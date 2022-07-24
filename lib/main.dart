@@ -13,23 +13,13 @@ void main() async {
   var response = await http
       .get(Uri.parse("http://www.mocky.io/v2/5d565297300000680030a986"));
   final r = json.decode(response.body);
-  List<EmployeeListModel> rs = [];
 
   r.forEach((element) {
-    rs.add(EmployeeListModel.fromJson(element ?? ""));
+    DBProvider.db.createEmployee(EmployeeListModel.fromJson(element));
   });
-
-  rs.forEach((element) {
-
-    DBProvider.db.createEmployee(element);
-
-
-  });
-
 
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -43,13 +33,11 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-
         primarySwatch: Colors.blue,
       ),
       home: const EmployeesListPageView(),
     );
   }
 }
-

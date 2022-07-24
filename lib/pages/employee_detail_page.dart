@@ -3,32 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:whiterabittest/model/employee_list_model.dart';
 
 class EmployeeDetailPage extends StatefulWidget {
-   EmployeeDetailPage({this.details,this.address,this.companyDetails});
+  EmployeeDetailPage({this.details});
 
-  final EmployeeListModel? details ;
-  final Company? companyDetails ;
-  final Address?
-   address;
+  final EmployeeListModel? details;
+
   @override
   State<EmployeeDetailPage> createState() => _EmployeeDetailPageState();
 }
 
 class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
- TextStyle textStyle= TextStyle(
-  fontSize: 16
-  );
+  TextStyle textStyle = TextStyle(fontSize: 16);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
 
-      appBar: AppBar(title:
-        const Text("Employee Detail Page"),
-        centerTitle: true,),
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Employee Detail Page"),
+        centerTitle: true,
+      ),
       body: ListView(
         children: [
           Container(
-            decoration: const BoxDecoration(
-                shape: BoxShape.circle),
+            decoration: const BoxDecoration(shape: BoxShape.circle),
             padding: const EdgeInsets.symmetric(horizontal: 10),
             // height: 100,
             child: Card(
@@ -38,37 +36,26 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
-
-
-
                   Expanded(
                       flex: 1,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center,
-                        crossAxisAlignment: CrossAxisAlignment
-                            .center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         // mainAxisSize: MainAxisSize.max,
                         children: [
                           SizedBox(
                             height: 10,
                           ),
                           Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.center,
-                            crossAxisAlignment:
-                            CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               CircleAvatar(
                                 backgroundImage: NetworkImage(
-                                    widget.details
-                                    !.profileImage ??
-                                        ""),
+                                    widget.details!.profileImage ?? ""),
                                 radius:
-                                100.0, // no matter how big it is, it won't overflow
+                                    100.0, // no matter how big it is, it won't overflow
                               ),
-
                             ],
                           ),
                           SizedBox(
@@ -77,58 +64,56 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 30),
                             child: Column(
-                              mainAxisAlignment:
-                              MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("UserName : ${widget.details!.username
-                                    ?? ""}",
+                                Text(
+                                  "UserName : ${widget.details!.username ?? ""}",
                                   style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.blue
-                                  ),
+                                      fontSize: 20, color: Colors.blue),
                                 ),
-                                SizedBox(height: 40,),
-                                Text("Email : ${widget.details!.email
-                                    ?? ""}"
-                                    ,style: textStyle,
+                                SizedBox(
+                                  height: 40,
                                 ),
-                                widget.companyDetails !=null ?
                                 Text(
-                                    "Name : ${widget.details
-                                    !.name ?? ""}\n"
-                                        "Company : ${widget.companyDetails
-                                    !.name ?? ""}"
-                                  ,style: textStyle,
-                                ):
-
+                                  "Email : ${widget.details!.email ?? ""}",
+                                  style: textStyle,
+                                ),
                                 Text(
-                                    "Name : ${widget.details
-                                    !.name ?? ""}\n"
-                                  ,style: textStyle,
+                                  "Name : ${widget.details!.name ?? ""}\n"
+                                  "Company : ${widget.details!.company!.cname ?? ""}",
+                                  style: textStyle,
                                 ),
-
-
-
-
-                                widget.address !=null ?
-                                Text("Address : ${widget.address!.street
-                                    ?? ""}"
-                                  ,style: textStyle,
-                                ):
-
+                                widget.details!.address!.street!.isNotEmpty
+                                     ?
                                 Text(
-                                    " "
-
-                                ),
-                                Text("Phone : ${widget.details!.phone
-                                    ?? " No Number"}"
-                                  ,style: textStyle,
-                                ),
-                                Text("Website : ${widget.details!.website
-                                    ?? ""}\n"
-                                  ,style: textStyle,
+                                  "Address : ${widget.details!.address!.street ??"NIL"}",
+                                  style: textStyle,
                                 )
+                                :
+                                Text(
+                                  "Address : --NIL--",
+                                  style: textStyle,
+                                ),
+                                widget.details!.phone!.isNotEmpty ?
+                                Text(
+                                  "Phone : ${widget.details!.phone}",
+                                  style: textStyle,
+                                ):
+                                Text(
+                                  "Phone : --NIL--",
+                                  style: textStyle,
+                                ),
+                                widget.details!.website!.isNotEmpty ?
+                                Text(
+                                  "Website : ${widget.details!.website ?? "--NIL--"}\n",
+                                  style: textStyle,
+                                )
+                            :
+                            Text(
+                            "Website : --NIL--",
+                            style: textStyle,
+                          ),
                               ],
                             ),
                           )
@@ -138,7 +123,6 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> {
               ),
             ),
           ),
-
         ],
       ),
     );

@@ -16,22 +16,33 @@ class DBProvider {
   createEmployee(EmployeeListModel? newEmployee) async {
     final db = await database;
 
-    await db!.insert(
-      'Employee',
-      newEmployee!.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+    var result = await db!.rawQuery(
+      'SELECT EXISTS(SELECT 1 FROM Employee WHERE id="${newEmployee!.id}")',
     );
+    int? exists = Sqflite.firstIntValue(result);
 
-    await db.insert(
-      'Address',
-      newEmployee.address!.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    await db.insert(
-      'Company',
-      newEmployee.company!.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    if (exists != 1) {
+      await db.insert(
+        'Employee',
+        newEmployee.toMap2(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      newEmployee.address!.employee_id = newEmployee.id;
+      await db.insert(
+        'Address',
+        newEmployee.address!.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      if (newEmployee.company != null) {
+        newEmployee.company!.employee_id = newEmployee.id;
+        await db.insert(
+          'Company',
+          newEmployee.company!.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    }
   }
 
 // get All employees
@@ -39,102 +50,95 @@ class DBProvider {
     final db = await database;
 
     // Query the table for all The Employee.
-    final List<Map<String, dynamic>> maps = await db!.query('Employee');
+
+    final List<Map<String, dynamic>> maps = await db!.rawQuery(''
+        'select e.*,c.name as cname,a.street as street  from employee e inner join company c inner join address a where  a.employee_id=e.id and e.id=c.employee_id;'
+        '');
 
     // Convert the List<Map<String, dynamic> into a List<EmployeeListModel>.
     return List.generate(maps.length, (i) {
+      maps.forEach((element) {
+        print(element);
+      });
+      var add = Address(
+          city: maps[i]['city'],
+          employee_id: maps[i]['employee_id'],
+          street: maps[i]['street'],
+          suite: maps[i]['suite'],
+          zipcode: maps[i]['zipcode']);
+
+      var company = Company(
+        employee_id: maps[i]['employee_id'],
+        cname: maps[i]['cname'],
+        bs: maps[i]['bs'],
+        catchPhrase: maps[i]['catchPhrase'],
+      );
+
       return EmployeeListModel(
         id: maps[i]['id'],
         name: maps[i]['name'],
         username: maps[i]['username'],
         email: maps[i]['email'],
-        address: maps[i]['address'],
+        address: add,
         profileImage: maps[i]['profile_image'],
         phone: maps[i]['phone'],
         website: maps[i]['website'],
-        company: maps[i]['company'],
+        company: company,
       );
     });
   }
 
-  //get employees address
-  Future<List<Address>> getAllEmployeesAddress() async {
+// seacrh employee by keyword is email or name
+  Future<List<EmployeeListModel>> getAllEmployeesBySearch(
+      String keyword) async {
     final db = await database;
 
-    // Query the table for all The Employees
-    final List<Map<String, dynamic>> maps = await db!.query('Address');
+    //Search Query the table for all The Employee.
+    final List<Map<String, dynamic>> maps = await db!.rawQuery(
+      ''
+      'select e.*,c.name as cname,a.street as street   from employee e inner join company c inner join address a where  a.employee_id=e.id and e.id=c.employee_id and (e.name like "%${keyword}%" or e.email like "%${keyword}%");'
+      '',
+    );
 
     // Convert the List<Map<String, dynamic> into a List<EmployeeListModel>.
     return List.generate(maps.length, (i) {
-      return Address(
-        street: maps[i]['street'],
-        suite: maps[i]['suite'],
-        city: maps[i]['city'],
-        zipcode: maps[i]['zipcode'],
+      var add = Address(
+          city: maps[i]['city'],
+          employee_id: maps[i]['employee_id'],
+          street: maps[i]['street'],
+          suite: maps[i]['suite'],
+          zipcode: maps[i]['zipcode']);
+
+      var company = new Company(
+        employee_id: maps[i]['employee_id'],
+        cname: maps[i]['cname'],
+        bs: maps[i]['bs'],
+        catchPhrase: maps[i]['catchPhrase'],
       );
-    });
-  }
 
-  //get employees company
-  Future<List<Company>> getAllEmployeesCompany() async {
-    final db = await database;
-
-    // Query the table for all The Employees
-    final List<Map<String, dynamic>> maps = await db!.query('Company');
-
-    // Convert the List<Map<String, dynamic> into a List<EmployeeListModel>.
-    return List.generate(maps.length, (i) {
-      return Company(
-          name: maps[i]['name'],
-          catchPhrase: maps[i]['catchPhrase'],
-          bs: maps[i]['bs']);
-    });
-  }
-
-  // search employee
-  Future<List<EmployeeListModel>> searchQuery(String? keyword) async {
-    // get a reference to the database
-    Database? db = await database;
-    // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db!.query('Employee',
-        columns: [
-          'name',
-          'id',
-          'username',
-          'email',
-          'phone',
-          'profile_image',
-          'website'
-        ],
-        whereArgs: ['$keyword'],
-        where: 'name = ?');
-
-    maps.forEach(print);
-    // Convert the List<Map<String, dynamic> into a List<EmployeeListModel>.
-    return List.generate(maps.length, (i) {
       return EmployeeListModel(
         id: maps[i]['id'],
         name: maps[i]['name'],
         username: maps[i]['username'],
         email: maps[i]['email'],
-        address: maps[i]['address'],
+        address: add,
         profileImage: maps[i]['profile_image'],
         phone: maps[i]['phone'],
         website: maps[i]['website'],
-        company: maps[i]['company'],
+        company: company,
       );
     });
   }
 
+//to check db is exsit or not
   Future<Database?> get database async {
     // If database exists, return database
     if (_database != null) {
-      print("db exist");
       return _database;
     } else {
       // If database don't exists, create one
       _database = await initDB();
-      print("db  not exist");
+
       return _database;
     }
   }
@@ -147,7 +151,7 @@ class DBProvider {
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Employee (id INTEGER PRIMARY KEY, name TEXT,username TEXT, email TEXT, phone TEXT, profile_image TEXT,website TEXT , address BLOB, company BLOB)');
+          'CREATE TABLE IF NOT EXISTS Employee (id INTEGER PRIMARY KEY, name TEXT,username TEXT, email TEXT, phone TEXT, profile_image TEXT,website TEXT )');
 
       await db.execute(
           'CREATE TABLE IF NOT EXISTS Address (id INTEGER PRIMARY KEY,employee_id INTEGER, street TEXT, suite TEXT,city TEXT, zipcode TEXT,FOREIGN KEY(employee_id) REFERENCES Employee(id))');

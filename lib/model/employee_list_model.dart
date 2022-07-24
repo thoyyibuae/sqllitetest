@@ -4,10 +4,10 @@ class EmployeeListModel {
   String? username;
   String? email;
   String? profileImage;
-  dynamic address;
+  Address? address;
   String? phone;
   String? website;
-  dynamic company;
+  Company? company;
 
   EmployeeListModel({
     this.id,
@@ -22,6 +22,19 @@ class EmployeeListModel {
   });
 
   Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'username': username,
+      'email': email,
+      'profile_image': profileImage,
+      'address': address,
+      'phone': phone,
+      'website': website,
+      'company': company
+    };
+  }
+  Map<String, dynamic> toMap2() {
     return {
       'id': id,
       'name': name,
@@ -69,12 +82,14 @@ class EmployeeListModel {
 }
 
 class Address {
+  int ?employee_id;
   String? street;
   String? suite;
   String? city;
   String? zipcode;
 
   Address({
+    this.employee_id,
     this.street,
     this.suite,
     this.city,
@@ -83,6 +98,7 @@ class Address {
 
   Map<String, dynamic> toMap() {
     return {
+      'employee_id':employee_id,
       'street': street,
       'suite': suite,
       'city': city,
@@ -91,6 +107,7 @@ class Address {
   }
 
   Address.fromJson(Map<String, dynamic> json) {
+    employee_id = json['employee_id'] ?? 0;
     street = json['street'] ?? "";
     suite = json['suite'] ?? "";
     city = json['city'] ?? "";
@@ -100,6 +117,7 @@ class Address {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['employee_id']= this.employee_id;
     data['street'] = this.street;
     data['suite'] = this.suite;
     data['city'] = this.city;
@@ -131,29 +149,33 @@ class Geo {
 }
 
 class Company {
-  String? name;
+  int ?employee_id;
+  String? cname;
   String? catchPhrase;
   String? bs;
 
-  Company({this.name, this.catchPhrase, this.bs});
+  Company({this.employee_id,this.cname, this.catchPhrase, this.bs});
 
   Map<String, dynamic> toMap() {
     return {
-      'name': name ?? "",
+      'employee_id':employee_id,
+      'name': cname ?? "",
       'catchPhrase': catchPhrase ?? "",
       'bs': bs ?? "",
     };
   }
 
   Company.fromJson(Map<String, dynamic> json) {
-    name = json['name'] ?? "";
+    employee_id = json['employee_id'] ?? 0;
+    cname = json['name'] ?? "";
     catchPhrase = json['catchPhrase'] ?? "";
     bs = json['bs'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
+    data['employee_id'] =this.employee_id;
+    data['name'] = this.cname;
     data['catchPhrase'] = this.catchPhrase;
     data['bs'] = this.bs;
     return data;
